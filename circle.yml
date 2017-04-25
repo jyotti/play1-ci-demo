@@ -1,0 +1,48 @@
+general:
+  branches:
+    only:
+      - master
+
+machine:
+  timezone:
+    Asia/Tokyo
+  java:
+    version: openjdk7
+  environment:
+    PLAY1_VERSION: "1.2.7"
+    PLAY1_HOME: ${HOME}/opt
+    LOCAL_BIN_DIR: ${HOME}/bin
+    PATH: ${PATH}:${LOCAL_BIN_DIR}
+
+dependencies:
+  pre:
+    - |
+      mkdir -p ${PLAY1_HOME} ${LOCAL_BIN_DIR}
+      ./scripts/bootstrap.sh ${PLAY1_VERSION} ${PLAY1_HOME}
+      ln -sf ${PLAY1_HOME}/play-${PLAY1_VERSION}/play ${LOCAL_BIN_DIR}/play
+      play version
+  override:
+    - play deps --sync
+  cache_directories:
+    #---> 変数は評価されない
+    # - ${HOME}/opt
+    #---> /home/ubuntu/opt で評価される
+    - ~/opt
+    #---> 絶対パスは評価される
+    #- /opt/play-1.2.7
+    #---> ${project-home}/opt と評価される
+    # - opt
+
+compile:
+  override:
+    - play precompile
+
+test:
+  override:
+    - echo "Skip test process..."
+
+deployment:
+  staging:
+    branch: master
+    commands:
+      - echo "deployment!"
